@@ -17,8 +17,7 @@
 
 ## Usage
 + Do a System -- > Reset Configuration [keep default config after reboot]
-+ Copy and past this command on terminal "/tool fetch address=raw.githubusercontent.com host=raw.githubusercontent.com mode=https src-path=angolo40/Mikrotik_AIOScript/master/Mikortik_AIO.rsc dst-path=Mikrotik_AIO.rsc"
-+ The import the file "import Mikrotik_AIO.rsc"
++ Copy, Modify and import the file "import Mikrotik_AIO.rsc"
 
 ## To Do
 + Email Notification on port scanning
