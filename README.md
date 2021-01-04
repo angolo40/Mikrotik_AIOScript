@@ -1,5 +1,5 @@
 # Mikrotik_AIOScript
-+ Tested on RB3011 - RouterOS 6.43.14
++ Tested on RB3011 - RouterOS 6.48
 
 ## Feature
 + Basic Lan Configuration
@@ -7,13 +7,16 @@
 + Port Scanner Blocking
 + Simple Dude configuration for remote logging
 + Simple DDoS Detection and Blocking
-+ Block SBL Blocklist.de
-+ Block SBL DShield
-+ Block SBL Spamhaus
-+ Block Tor Nodes
++ Simple openvpn port scanner blocking
++ Block spamhaus.org drop
++ Block spamhaus.org edrop
++ Block dshield.org
++ Block sslbl.abuse.ch
++ Block malc0de.com
 + Schedule Backup configuration to email
 + Email Notification on failed login
 + Authentication Logging to a dedicated log file
++ Persistent Log
 
 ## Usage
 + Do a System -- > Reset Configuration [keep default config after reboot]
