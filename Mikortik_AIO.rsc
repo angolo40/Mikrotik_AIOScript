@@ -2,12 +2,13 @@
 ###   Mikrotik Configuration               #
 ############################################
 
-#User Configuration
+# Change Mikrotik Identity
 :global mikrotikName "MikrotikName"
-:global mikrotikAdminPassword "verystrongpassword"
+
+#User Configuration
 #Add another admin user
-:global newMikrotikAdmin "admin2"
-:global newMikrotikAdminPassword "verystrongpassword"
+:global newMikrotikUser "Giuseppe"
+
 
 #Lan Configuration
 :global lanIpGateway "192.168.1.1"
@@ -49,9 +50,34 @@
 :global dudeSnmpLocation "Location"
 :global notificationMail "toEmail@smtpserver.com"
 
+#Dude Configuration Snmp v3
+:global configureDude "yes"
+:global newMikrotikDude "Dude"
+:global dudeAuthenticationProtocol "SHA1"
+:global dudeEncProtocol "AES"
+:global dudeSnmpCommName "DudeName"
+:global dudeSnmpLocation "Location"
+:global notificationMail "toEmail@smtpserver.com"
+
+###########################
+
 ###########################
 #  Don't edit after this  #
 ###########################
+
+:global mikrotikAdminPassword (:put ([/tool fetch mode=https http-method=get url="https://www.passwordrandom.com/query\?command=password" as-value output=user ]->"data"))
+:global newMikrotikUserPassword (:put ([/tool fetch mode=https http-method=get url="https://www.passwordrandom.com/query\?command=password" as-value output=user ]->"data"))
+:global newMikrotikDudePassword (:put ([/tool fetch mode=https http-method=get url="https://www.passwordrandom.com/query\?command=password" as-value output=user ]->"data"))
+:global dudeAuthenticationPassword (:put ([/tool fetch mode=https http-method=get url="https://www.passwordrandom.com/query\?command=password" as-value output=user ]->"data"))
+:global dudeEncPassword (:put ([/tool fetch mode=https http-method=get url="https://www.passwordrandom.com/query\?command=password" as-value output=user ]->"data"))
+
+/file print file=passwordfile.txt
+:delay 5
+/file set passwordfile.txt contents=""
+
+:global passwordfile [/file get passwordfile.txt contents]
+:set passwordfile ($passwordfile . $mikrotikName . "\n" . "AdminPassword: " . $mikrotikAdminPassword . "\n" . "Username:" . $newMikrotikUser . " Password: " . $newMikrotikUserPassword . "\n" . "Dude:" . $newMikrotikDudePassword . " DudeAuthenticationPassword:" . $dudeAuthenticationPassword . " DudeEncPassword:" . $dudeEncPassword )
+/file set passwordfile.txt contents="$passwordfile"
 
 #Configure Basic Lan 
 /ip address set interface=bridge address="$lanIpGateway/$lanNetworkBits" network="$lanNetworkAddress" comment="LAN" numbers=0
@@ -124,7 +150,7 @@ add address=192.175.48.0/24 comment="RFC 7534 (Direct Delegation AS112 Service)"
 add address=255.255.255.255 comment="RFC 919 (Limited Broadcast)" disabled=yes list=Bogons
 
 # Delete default firewall rule
-# /ip firewall filter remove [/ip firewall filter find action!=passthrough ]
+/ip firewall filter remove [/ip firewall filter find action!=passthrough ]
 
 # Allow ip in whitelist
 /ip firewall filter add chain=input src-address-list=Allowed action=accept comment="--0-1-- Allowed IP"
@@ -290,7 +316,7 @@ add interval=1d name=Blacklist on-event=Blacklist policy=ftp,reboot,read,write,p
 add name=Backup owner=admin policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon source=":log warning Mikrotik Router Backup JOB Started . . .\r    \n:local backupfile mt_config_backup\r    \n:local mikrotikexport mt_export_backup\r    \n:local sub1 ([/system identity get name])\r    \n:local sub2 ([/system clock get time])\r    \n:local sub3 ([/system clock get date])\r    \n\r    \n:log warning \$sub1 : Creating new up to date backup files . . . \r    \n \r    \n# Start creating Backup files backup and export both\r    \n/system backup save name=mt_config_backup dont-encrypt=yes\r    \n/export terse file=mt_export_backup\r    \n \r    \n:log warning \$sub1 : Backup JOB process pausing for 10s so it can complete creating backup. Usually for Slow systems ...\r    \n:delay 10s\r    \n \r    \n:log warning Backup JOB is now sending Backup File via Email using SMTP . . .\r    \n \r    \n# Start Sending email files, make sure you have configured tools email section before this. or else it will fail\r    \n/tool e-mail send to=\$backupMail subject=\$sub3 \$sub2 \$sub1 Configuration BACKUP File file=mt_config_backup.backup start-tls=yes\r    \n/tool e-mail send to=\$backupMail subject=\$sub3 \$sub2 \$sub1 Configuration EXPORT File file=mt_export_backup.rsc start-tls=yes\r    \n \r    \n:log warning \$sub1 : BACKUP JOB: Sleeping for 30 seconds so email can be delivered, \r    \n:delay 10s\r    \n \r    \n# REMOVE Old backup files to save space.\r    \n/file remove \$backupfile\r    \n/file remove \$mikrotikexport\r    \n \r    \n# Print Log for done\r    \n:log warning \$sub1 : Backup JOB: Process Finished & Backup File Removed. All Done. You should verify your inbox for confirmation\r    \n \r    \n# Script END"
 
 /system scheduler
-add interval=2w1d name=Backup on-event=Backup policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon start-date=jun/13/2017 start-time=00:00:00
+add interval=7d name=Backup on-event=Backup policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon start-date=jun/13/2017 start-time=00:00:00
 
 # SNMP v3 Configuration for Dude
 /user add name="$newMikrotikDude" password="$newMikrotikDudePassword" group=full
@@ -299,7 +325,12 @@ add interval=2w1d name=Backup on-event=Backup policy=ftp,reboot,read,write,polic
 /snmp set contact="$notificationMail" location="$dudeSnmpLocation" enabled=yes
 /snmp set trap-community="$dudeSnmpCommName" trap-version=3
 
+#Send Email with password file
+/tool e-mail send to=$backupMail subject=MikrotikPassword file=passwordfile.txt start-tls=yes
+
 # Set Mikrotik name & password
 /system identity set name="$mikrotikName"
 /user set 0 password="$mikrotikAdminPassword"
 /user add name="$newMikrotikAdmin" password="$newMikrotikAdminPassword" group=full
+
+
