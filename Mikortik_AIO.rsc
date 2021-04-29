@@ -41,18 +41,6 @@
 #Dude Configuration Snmp v3
 :global configureDude "yes"
 :global newMikrotikDude "Dude"
-:global newMikrotikDudePassword "anotherverystrongpassword"
-:global dudeAuthenticationProtocol "SHA1"
-:global dudeAuthenticationPassword "anotherverystrongpassword"
-:global dudeEncProtocol "AES"
-:global dudeEncPassword "anotherverystrongpassword"
-:global dudeSnmpCommName "DudeName"
-:global dudeSnmpLocation "Location"
-:global notificationMail "toEmail@smtpserver.com"
-
-#Dude Configuration Snmp v3
-:global configureDude "yes"
-:global newMikrotikDude "Dude"
 :global dudeAuthenticationProtocol "SHA1"
 :global dudeEncProtocol "AES"
 :global dudeSnmpCommName "DudeName"
@@ -166,8 +154,8 @@ add address=255.255.255.255 comment="RFC 919 (Limited Broadcast)" disabled=yes l
 /ip firewall filter add action=accept chain=output comment="Section Break" disabled=yes
 /ip firewall filter add action=add-src-to-address-list address-list="WAN High Connection Rates" address-list-timeout=1d chain=input comment="--2-5-- Add WAN High Connections to Address List – Helps with DDoS Attacks" connection-limit=100,32 in-interface-list="WAN"
 /ip firewall filter add action=add-src-to-address-list address-list="LAN High Connection Rates" address-list-timeout=1d chain=forward comment="--2-6-- Add LAN High Connections toAddress List – Helps identify compromised systems on your network" connection-limit=500,32 in-interface-list="LAN"
-/ip firewall filter add action=accept chain=output comment="Section Break" disabled=yes
 /ip firewall filter add chain=output action=accept disabled=yes comment="--2-0-- DDoS Detection and Blocking"
+/ip firewall filter add action=accept chain=output comment="Section Break" disabled=yes
 
 # PortScanner finding
 /ip firewall raw add chain=output action=accept disabled=yes comment="--3-0-- PortScanner Blocking"
@@ -326,7 +314,7 @@ add interval=7d name=Backup on-event=Backup policy=ftp,reboot,read,write,policy,
 /snmp set trap-community="$dudeSnmpCommName" trap-version=3
 
 #Send Email with password file
-/tool e-mail send to=$backupMail subject=MikrotikPassword file=passwordfile.txt start-tls=yes
+/tool e-mail send to=$backupMail subject=MikrotikPassword body=PasswordFile file=passwordfile.txt
 
 # Set Mikrotik name & password
 /system identity set name="$mikrotikName"
