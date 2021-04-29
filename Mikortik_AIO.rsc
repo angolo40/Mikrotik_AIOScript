@@ -331,6 +331,6 @@ add interval=7d name=Backup on-event=Backup policy=ftp,reboot,read,write,policy,
 # Set Mikrotik name & password
 /system identity set name="$mikrotikName"
 /user set 0 password="$mikrotikAdminPassword"
-/user add name="$newMikrotikAdmin" password="$newMikrotikAdminPassword" group=full
+/user add name="$newMikrotikUser" password="$newMikrotikUserPassword" group=full
 
 
